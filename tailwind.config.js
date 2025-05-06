@@ -14,6 +14,15 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                'cos-blue': '#175cd3',
+                'cos-red': '#d62828',
+                'cos-yellow': '#fcbf49',
+                'cos-light-yellow': '#fad991',
+                'cos-dark-yellow': '#dea12a',
+                'cos-orange': '#f77f00',
+                'cos-cream': '#eae2b7',
+            },
         },
     },
     plugins: [],
