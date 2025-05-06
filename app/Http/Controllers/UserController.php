@@ -60,7 +60,7 @@ class UserController extends Controller
         $token = $user->createToken('api_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Login berhasil!',
+            'success' => 'Login berhasil!',
             'token' => $token,
             'user' => $user,
         ]);
