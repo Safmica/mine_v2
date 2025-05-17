@@ -46,43 +46,40 @@
         </p>
     </div>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
 <script>
-    $('#signupForm').on('submit', function(e) {
+$(document).ready(function () {
+    $('#signupForm').on('submit', function (e) {
         e.preventDefault();
 
-        const data = {
+        const formData = {
             name: $('input[name="name"]').val(),
             email: $('input[name="email"]').val(),
             password: $('input[name="password"]').val(),
-            _token: '{{ csrf_token() }}'
         };
 
         $.ajax({
             url: '/api/signup',
-            method: 'POST',
-            data: data,
-            success: function(response) {
-                showMessage(response.success, 'green');
-                window.location.href = '/login';
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                $.cookie('auth_token', response.token, { path: '/', expires: 1 });
+                window.location.href = '/login'; // redirect setelah berhasil signup
             },
-            error: function(xhr) {
-                const error = xhr.responseJSON.error;
-                showMessage(error, 'red');
+            error: function (xhr) {
+                let message = 'Signup gagal.';
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    const errors = xhr.responseJSON.errors;
+                    message = Object.values(errors).flat().join('<br>');
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                }
+
+                $('#errorContainer').html(message).removeClass('hidden');
             }
         });
     });
-
-    function showMessage(message, color) {
-        const messageDiv = `
-            <div x-data="{ show: true }" 
-                x-show="show"
-                x-init="setTimeout(() => show = false, 3000)"
-                class="fixed top-5 left-1/2 -translate-x-1/2 bg-${color}-500 text-white px-6 py-3 rounded-lg shadow-lg transition">
-                ${message}
-            </div>
-        `;
-        $('body').append(messageDiv);
-    }
+});
 </script>

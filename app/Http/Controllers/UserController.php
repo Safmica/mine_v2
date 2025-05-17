@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 
 class UserController extends Controller
 {
@@ -43,35 +44,24 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Email atau password salah',
-            ], 401);
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return response()->json(['message' => 'Login berhasil']);
         }
 
-        Auth::login($user);
-        $token = $user->createToken('api_token')->plainTextToken;
-
-        return response()->json([
-            'success' => 'Login berhasil!',
-            'token' => $token,
-            'user' => $user,
-        ]);
+        return response()->json(['message' => 'Email atau password salah'], 401);
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        $request->user()->currentAccessToken()->delete();
+        Auth::logout('user_id');
+        Cookie::queue(Cookie::forget('user_name'));
 
-        return response()->json([
-            'message' => 'Logout berhasil',
-        ]);
+        return redirect('/login')->with('success', 'Logout berhasil');
     }
 }
